@@ -49,6 +49,23 @@ app.get('/', (req,res)=> res.json({
 
 app.get('/health', (req,res)=> res.json({ status: 'healthy', uptime: process.uptime() }));
 
+app.get('/seed-data', async (req, res) => {
+  try {
+    await ensurePermanentData();
+    const busCount = await Bus.countDocuments();
+    const userCount = await User.countDocuments();
+    const couponCount = await Coupon.countDocuments();
+    res.json({ 
+      message: 'Data seeded successfully',
+      buses: busCount,
+      users: userCount,
+      coupons: couponCount
+    });
+  } catch (err) {
+    res.json({ error: err.message });
+  }
+});
+
 app.get('/debug/buses', async (req, res) => {
   try {
     const count = await Bus.countDocuments();
@@ -154,13 +171,18 @@ function generatePermanentBuses() {
 
 async function ensurePermanentData(){
   try{
+    console.log('🔍 Checking permanent data...');
+    
     // Check if we have enough buses (should have thousands)
     const busCount = await Bus.countDocuments();
     const userCount = await User.countDocuments();
     const couponCount = await Coupon.countDocuments();
     
-    // If we don't have enough data, create it
-    if (busCount < 10000 || userCount < 4 || couponCount < 3) {
+    console.log(`📊 Current counts - Buses: ${busCount}, Users: ${userCount}, Coupons: ${couponCount}`);
+    
+    // ALWAYS ensure we have complete data
+    if (busCount < 50000 || userCount < 4 || couponCount < 4) {
+      console.log('🚀 Creating permanent data...');
       // Create default users
       const users = [
         { name: 'System Admin', email: 'admin@bookmyseat.com', password: 'admin123', role: 'admin' },
@@ -189,17 +211,21 @@ async function ensurePermanentData(){
         await Coupon.insertMany(coupons);
       }
       
-      // Create buses if needed
-      if (busCount < 10000) {
+      // ALWAYS ensure buses for full year
+      if (busCount < 50000) {
+        console.log('🛣️ Regenerating all buses...');
         await Bus.deleteMany({});
         const buses = generatePermanentBuses();
+        console.log(`📊 Generated ${buses.length} buses`);
         
         // Insert in batches
-        const batchSize = 500;
+        const batchSize = 1000;
         for (let i = 0; i < buses.length; i += batchSize) {
           const batch = buses.slice(i, i + batchSize);
           await Bus.insertMany(batch);
+          console.log(`✅ Inserted batch ${Math.floor(i/batchSize) + 1}/${Math.ceil(buses.length/batchSize)}`);
         }
+        console.log('🎉 All buses created!');
       }
     }
   }catch(err){
