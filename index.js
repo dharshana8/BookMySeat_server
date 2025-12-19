@@ -16,7 +16,7 @@ dotenv.config();
 const app = express();
 
 app.use(cors({ 
-  origin: ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173', 'https://bookmyseat.vercel.app'], 
+  origin: ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173', 'https://bookmyseat.vercel.app', 'https://bustbooking.netlify.app'], 
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -100,10 +100,10 @@ function generatePermanentBuses() {
     { name: 'VRL Travels', types: [{ type: 'Multi Axle AC', seats: 40, fare: 850 }, { type: 'AC Semi Sleeper', seats: 42, fare: 550 }] }
   ];
   
-  const timeSlots = ['05:30', '07:00', '09:30', '12:00', '15:00', '18:00', '21:00', '23:30'];
+  const timeSlots = ['06:00', '12:00', '18:00', '23:00'];
   
-  // Generate buses for next 90 days
-  for (let day = 0; day < 90; day++) {
+  // Generate buses for next 365 days
+  for (let day = 0; day < 365; day++) {
     const currentDate = new Date(today);
     currentDate.setDate(today.getDate() + day);
     
@@ -160,11 +160,12 @@ async function ensurePermanentData(){
     const couponCount = await Coupon.countDocuments();
     
     // If we don't have enough data, create it
-    if (busCount < 1000 || userCount < 3 || couponCount < 3) {
+    if (busCount < 10000 || userCount < 4 || couponCount < 3) {
       // Create default users
       const users = [
         { name: 'System Admin', email: 'admin@bookmyseat.com', password: 'admin123', role: 'admin' },
         { name: 'Dharsh Kumar', email: 'dharsh@bookmyseat.com', password: 'dharsh123', role: 'admin' },
+        { name: 'Harishini Admin', email: 'harishini@bookmyseat.com', password: 'harishini123', role: 'admin' },
         { name: 'Demo User', email: 'user@demo.com', password: 'user123', role: 'user' }
       ];
       
@@ -189,7 +190,7 @@ async function ensurePermanentData(){
       }
       
       // Create buses if needed
-      if (busCount < 1000) {
+      if (busCount < 10000) {
         await Bus.deleteMany({});
         const buses = generatePermanentBuses();
         

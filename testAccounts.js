@@ -18,7 +18,8 @@ async function createTestAccounts() {
     const adminAccounts = [
       { name: 'Admin User', email: 'admin@bookmyseat.com', password: 'admin123' },
       { name: 'Test Admin', email: 'test@bookmyseat.com', password: 'test123' },
-      { name: 'Dharsh Admin', email: 'dharsh@bookmyseat.com', password: 'dharsh123' }
+      { name: 'Dharsh Admin', email: 'dharsh@bookmyseat.com', password: 'dharsh123' },
+      { name: 'Harishini', email: 'harishini@bookmyseat.com', password: 'harishini123' }
     ];
     
     // Create regular user accounts
