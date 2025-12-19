@@ -227,22 +227,33 @@ async function ensurePermanentData(){
         }
         console.log('🎉 All buses created!');
       }
+      
+      console.log('✅ Permanent data check complete!');
+      console.log(`📊 Final counts - Buses: ${await Bus.countDocuments()}, Users: ${await User.countDocuments()}, Coupons: ${await Coupon.countDocuments()}`);
     }
   }catch(err){
-    console.error('Error ensuring permanent data:', err);
+    console.error('❌ Error ensuring permanent data:', err);
+    // Retry after 5 seconds if failed
+    setTimeout(ensurePermanentData, 5000);
   }
 }
 
 async function start(){
   try{
     await connectDb();
+    
+    // ALWAYS ensure data is available
     await ensurePermanentData();
+    
+    // Run data check every 6 hours to maintain availability
+    setInterval(ensurePermanentData, 6 * 60 * 60 * 1000);
     
     const port = process.env.PORT || 5000;
     app.listen(port, '0.0.0.0', () => {
       console.log(`✅ Server running on port ${port}`);
       console.log(`🌐 Visit: http://localhost:${port}`);
       console.log(`📡 App is listening on port ${port}`);
+      console.log(`🔄 Data maintenance: Every 6 hours`);
     });
     
   }catch(err){
