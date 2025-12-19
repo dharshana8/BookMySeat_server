@@ -14,6 +14,7 @@ import bcrypt from 'bcryptjs';
 dotenv.config();
 
 const app = express();
+
 app.use(cors({ 
   origin: ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:5173', 'https://bookmyseat.vercel.app'], 
   credentials: true,
@@ -68,6 +69,10 @@ app.post('/debug/reseed', async (req, res) => {
     return res.json({ error: err.message });
   }
 });
+
+
+
+
 
 function generatePermanentBuses() {
   const buses = [];
@@ -207,8 +212,10 @@ async function start(){
     await ensurePermanentData();
     
     const port = process.env.PORT || 5000;
-    app.listen(port, () => {
-      console.log(`Server running on port ${port}`);
+    app.listen(port, '0.0.0.0', () => {
+      console.log(`✅ Server running on port ${port}`);
+      console.log(`🌐 Visit: http://localhost:${port}`);
+      console.log(`📡 App is listening on port ${port}`);
     });
     
   }catch(err){
