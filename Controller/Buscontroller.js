@@ -99,6 +99,13 @@ export async function bookSeats(req, res) {
       return res.status(404).json({ message: 'Bus not found' });
     }
     
+    // Check if bus has already departed
+    const currentTime = new Date();
+    const departureTime = new Date(bus.departure);
+    if (departureTime <= currentTime) {
+      return res.status(400).json({ message: 'Cannot book this bus as it has already departed or is currently departing' });
+    }
+    
     // Clean expired holds first
     await cleanExpiredHolds(bus);
     

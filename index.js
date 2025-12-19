@@ -5,6 +5,7 @@ import { connectDb } from './Db/Db.js';
 import authRoutes from './Routes/Authroute.js';
 import busRoutes from './Routes/Busroute.js';
 import couponRoutes from './Routes/Couponroute.js';
+import contactRoutes from './Routes/Contactroute.js';
 import User from './Model/Usermodel.js';
 import Bus from './Model/Busmodel.js';
 import Coupon from './Model/Couponmodel.js';
@@ -24,6 +25,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/buses', busRoutes);
 app.use('/api/coupons', couponRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {
@@ -39,7 +41,8 @@ app.get('/', (req,res)=> res.json({
   endpoints: {
     auth: '/api/auth',
     buses: '/api/buses', 
-    coupons: '/api/coupons'
+    coupons: '/api/coupons',
+    contact: '/api/contact'
   }
 }));
 
