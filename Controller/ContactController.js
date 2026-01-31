@@ -41,6 +41,19 @@ export async function getAllContacts(req, res) {
   }
 }
 
+export async function getUserContacts(req, res) {
+  try {
+    const contacts = await Contact.find({ userId: req.user._id })
+      .populate('respondedBy', 'name email')
+      .sort({ createdAt: -1 });
+    
+    return res.json(contacts);
+  } catch (err) {
+    console.error('getUserContacts error:', err);
+    return res.status(500).json({ message: 'Server error: ' + err.message });
+  }
+}
+
 export async function updateContactStatus(req, res) {
   try {
     const { status, adminResponse } = req.body;
@@ -64,6 +77,41 @@ export async function updateContactStatus(req, res) {
     return res.json({ message: 'Contact updated successfully', contact });
   } catch (err) {
     console.error('updateContactStatus error:', err);
+    return res.status(500).json({ message: 'Server error: ' + err.message });
+  }
+}
+
+export async function submitFeedback(req, res) {
+  try {
+    const { satisfied, rating, comment } = req.body;
+    const contactId = req.params.id;
+    
+    const contact = await Contact.findById(contactId);
+    if (!contact) {
+      return res.status(404).json({ message: 'Support ticket not found' });
+    }
+    
+    if (contact.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+    
+    const updates = {
+      userFeedback: {
+        satisfied,
+        rating,
+        comment: comment?.trim(),
+        submittedAt: new Date()
+      },
+      followUpNeeded: !satisfied,
+      status: satisfied ? 'Closed' : 'Open'
+    };
+    
+    const updatedContact = await Contact.findByIdAndUpdate(contactId, updates, { new: true })
+      .populate('respondedBy', 'name email');
+    
+    return res.json({ message: 'Feedback submitted successfully', contact: updatedContact });
+  } catch (err) {
+    console.error('submitFeedback error:', err);
     return res.status(500).json({ message: 'Server error: ' + err.message });
   }
 }

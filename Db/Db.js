@@ -12,10 +12,9 @@ export async function connectDb() {
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000
     });
-    console.log('✅ MongoDB Atlas connected');
+    console.log('MongoDB Atlas connected');
   } catch (err) {
-    console.error('❌ MongoDB Atlas connection failed:', err.message);
-    console.error('📝 Fix: Add your IP to Atlas whitelist or use 0.0.0.0/0');
+    console.error('MongoDB connection failed:', err.message);
     throw err;
   }
 }

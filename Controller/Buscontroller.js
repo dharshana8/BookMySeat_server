@@ -13,28 +13,39 @@ export async function listBuses(req, res) {
     if (minFare || maxFare) q.fare = {};
     if (minFare) q.fare.$gte = Number(minFare);
     if (maxFare) q.fare.$lte = Number(maxFare);
+    
+    // Simple date filtering - show all buses for demo
     if (date) {
-      const startDate = new Date(date);
-      const endDate = new Date(date);
-      endDate.setDate(endDate.getDate() + 1);
-      q.departure = { $gte: startDate, $lt: endDate };
+      const searchDate = new Date(date);
+      const startDate = new Date(searchDate);
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(searchDate);
+      endDate.setHours(23, 59, 59, 999);
+      q.departure = { $gte: startDate, $lte: endDate };
     }
-    const buses = await Bus.find(q)
+    
+    let buses = await Bus.find(q)
       .select('-description -checkpoints')
       .sort({ departure: 1 })
       .lean()
       .limit(100);
+    
+    console.log(`Found ${buses.length} buses for query:`, q);
     return res.json(buses);
   } catch (err) {
-    console.error(err);
+    console.error('listBuses error:', err);
     return res.status(500).json({ message: 'Server error' });
   }
 }
 
 export async function getBus(req, res) {
   try {
-    const bus = await Bus.findOne({ id: req.params.id });
+    let bus = await Bus.findOne({ id: req.params.id }).lean();
     if (!bus) return res.status(404).json({ message: 'Bus not found' });
+    
+    // Allow viewing any bus (no time restriction)
+    // Time check removed for demo purposes
+    
     return res.json(bus);
   } catch (err) {
     console.error(err);
@@ -97,13 +108,6 @@ export async function bookSeats(req, res) {
     const bus = await Bus.findOne({ id: req.params.id });
     if (!bus) {
       return res.status(404).json({ message: 'Bus not found' });
-    }
-    
-    // Check if bus has already departed
-    const currentTime = new Date();
-    const departureTime = new Date(bus.departure);
-    if (departureTime <= currentTime) {
-      return res.status(400).json({ message: 'Cannot book this bus as it has already departed or is currently departing' });
     }
     
     // Clean expired holds first
